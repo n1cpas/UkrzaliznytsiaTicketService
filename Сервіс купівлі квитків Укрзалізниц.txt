@@ -1,0 +1,135 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+class TrainTicket {
+    private String destination;
+    private String departure;
+    private String date;
+    private float price;
+    private int availableSeats;
+
+    public TrainTicket(String destination, String departure, String date, float price, int availableSeats) {
+        this.destination = destination;
+        this.departure = departure;
+        this.date = date;
+        this.price = price;
+        this.availableSeats = availableSeats;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public String getDeparture() {
+        return departure;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public float getPrice() {
+        return price;
+    }
+
+    public int getAvailableSeats() {
+        return availableSeats;
+    }
+
+    public void setAvailableSeats(int availableSeats) {
+        this.availableSeats = availableSeats;
+    }
+
+    @Override
+    public String toString() {
+        return "Квиток{" +
+                "Пункт призначення='" + destination + '\'' +
+                ", Пункт відправлення='" + departure + '\'' +
+                ", Дата=" + date +
+                ", Ціна=" + price +
+                ", Доступні місця=" + availableSeats +
+                '}';
+    }
+}
+
+public class UkrzaliznytsiaTicketService {
+    private Map<Integer, TrainTicket> ticketCatalog = new HashMap<>();
+    private int lastTicketId = 0;
+
+    public void addTicket(String destination, String departure, String date, float price, int availableSeats) {
+        lastTicketId++;
+        ticketCatalog.put(lastTicketId, new TrainTicket(destination, departure, date, price, availableSeats));
+    }
+
+    public List<TrainTicket> getAvailableTickets() {
+        List<TrainTicket> availableTickets = new ArrayList<>();
+        for (TrainTicket ticket : ticketCatalog.values()) {
+            if (ticket.getAvailableSeats() > 0) {
+                availableTickets.add(ticket);
+            }
+        }
+        return availableTickets;
+    }
+
+    public void bookTicket(int ticketId) {
+        if (ticketCatalog.containsKey(ticketId)) {
+            TrainTicket ticket = ticketCatalog.get(ticketId);
+            if (ticket.getAvailableSeats() > 0) {
+                ticket.setAvailableSeats(ticket.getAvailableSeats() - 1);
+                System.out.println("Квиток успішно заброньовано.");
+            } else {
+                System.out.println("На жаль, місця на цей рейс закінчилися.");
+            }
+        } else {
+            System.out.println("Квиток з введеним ID не знайдено.");
+        }
+    }
+
+    public static void main(String[] args) {
+        UkrzaliznytsiaTicketService ticketService = new UkrzaliznytsiaTicketService();
+        ticketService.addTicket("Київ", "Львів", "2023-10-15", 350.0f, 100);
+        ticketService.addTicket("Львів", "Одеса", "2023-10-20", 450.0f, 50);
+
+        Scanner scanner = new Scanner(System.in);
+
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("Виберіть опцію:");
+            System.out.println("1. Переглянути доступні квитки");
+            System.out.println("2. Забронювати квиток");
+            System.out.println("3. Вихід");
+
+            int option = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (option) {
+                case 1:
+                    List<TrainTicket> availableTickets = ticketService.getAvailableTickets();
+                    if (availableTickets.isEmpty()) {
+                        System.out.println("Доступні квитки відсутні.");
+                    } else {
+                        System.out.println("Доступні квитки:");
+                        for (int i = 0; i < availableTickets.size(); i++) {
+                            System.out.println((i + 1) + ". " + availableTickets.get(i));
+                        }
+                    }
+                    break;
+                case 2:
+                    System.out.println("Введіть ID квитка, який ви хочете забронювати:");
+                    int ticketId = scanner.nextInt();
+                    scanner.nextLine();
+                    ticketService.bookTicket(ticketId);
+                    break;
+                case 3:
+                    exit = true;
+                    break;
+                default:
+                    System.out.println("Неправильний вибір, спробуйте ще раз!");
+            }
+        }
+    }
+}
